@@ -160,23 +160,43 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.HttpRequestHandler
  * @see org.springframework.web.servlet.mvc.Controller
  * @see org.springframework.web.context.ContextLoaderListener
+ *
+ * HTTP请求处理程序/控制器的核心分发器，例如用于Web UI控制器或基于HTTP的远程服务输出器。向注册的处理程序发送处理网络请求的指令，
+ * 提供方便的映射和异常处理设施。
+ *
+ * 这个servlet非常灵活。只要安装了相应的适配器类，它就可以用于任何工作流。它提供了以下功能，使其区别于其他请求驱动的Web MVC框架。
  */
 @SuppressWarnings("serial")
 public class DispatcherServlet extends FrameworkServlet {
 
-	/** Well-known name for the MultipartResolver object in the bean factory for this namespace. */
+	/**
+	 * Well-known name for the MultipartResolver object in the bean factory for this namespace.
+	 *
+	 * 在命名空间的Bean工厂中，MultipartResolver对象的名称。
+	 */
 	public static final String MULTIPART_RESOLVER_BEAN_NAME = "multipartResolver";
 
-	/** Well-known name for the LocaleResolver object in the bean factory for this namespace. */
+	/**
+	 * Well-known name for the LocaleResolver object in the bean factory for this namespace.
+	 *
+	 * 在命名空间的Bean工厂中，LocaleResolver对象的名称。
+	 */
 	public static final String LOCALE_RESOLVER_BEAN_NAME = "localeResolver";
 
-	/** Well-known name for the ThemeResolver object in the bean factory for this namespace. */
+	/**
+	 * Well-known name for the ThemeResolver object in the bean factory for this namespace.
+	 *
+	 * 在命名空间的Bean工厂中，ThemeResolver对象的名称。
+	 */
 	public static final String THEME_RESOLVER_BEAN_NAME = "themeResolver";
 
 	/**
 	 * Well-known name for the HandlerMapping object in the bean factory for this namespace.
 	 * Only used when "detectAllHandlerMappings" is turned off.
 	 * @see #setDetectAllHandlerMappings
+	 *
+	 * 在命名空间的Bean工厂中，HandlerMapping对象的名称。
+	 * 只有 detectAllHandlerMappings关闭时被用到.
 	 */
 	public static final String HANDLER_MAPPING_BEAN_NAME = "handlerMapping";
 
@@ -184,6 +204,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Well-known name for the HandlerAdapter object in the bean factory for this namespace.
 	 * Only used when "detectAllHandlerAdapters" is turned off.
 	 * @see #setDetectAllHandlerAdapters
+	 *
+	 * 在命名空间的Bean工厂中，HandlerAdapter对象的名称。
+	 * 只有 detectAllHandlerAdapters关闭时被用到.
 	 */
 	public static final String HANDLER_ADAPTER_BEAN_NAME = "handlerAdapter";
 
@@ -191,11 +214,16 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Well-known name for the HandlerExceptionResolver object in the bean factory for this namespace.
 	 * Only used when "detectAllHandlerExceptionResolvers" is turned off.
 	 * @see #setDetectAllHandlerExceptionResolvers
+	 *
+	 * 在命名空间的Bean工厂中，HandlerExceptionResolver对象的名称。
+	 * 只有 detectAllHandlerExceptionResolvers关闭时被用到.
 	 */
 	public static final String HANDLER_EXCEPTION_RESOLVER_BEAN_NAME = "handlerExceptionResolver";
 
 	/**
 	 * Well-known name for the RequestToViewNameTranslator object in the bean factory for this namespace.
+	 *
+	 * 在命名空间的Bean工厂中，RequestToViewNameTranslator对象的名称。
 	 */
 	public static final String REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME = "viewNameTranslator";
 
@@ -203,11 +231,16 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Well-known name for the ViewResolver object in the bean factory for this namespace.
 	 * Only used when "detectAllViewResolvers" is turned off.
 	 * @see #setDetectAllViewResolvers
+	 *
+	 * 在命名空间的Bean工厂中，ViewResolver对象的名称。
+	 * 只有 detectAllViewResolvers关闭时被用到.
 	 */
 	public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
 
 	/**
 	 * Well-known name for the FlashMapManager object in the bean factory for this namespace.
+	 *
+	 * 在命名空间的Bean工厂中，FlashMapManager对象的名称。
 	 */
 	public static final String FLASH_MAP_MANAGER_BEAN_NAME = "flashMapManager";
 
@@ -215,6 +248,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Request attribute to hold the current web application context.
 	 * Otherwise only the global web app context is obtainable by tags etc.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#findWebApplicationContext
+	 *
+	 * 请求属性，用于保存当前的Web应用程序上下文。 否则只能通过标签等获取全局的web应用上下文。
 	 */
 	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = DispatcherServlet.class.getName() + ".CONTEXT";
 
@@ -918,6 +953,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Exposes the DispatcherServlet-specific request attributes and delegates to {@link #doDispatch}
 	 * for the actual dispatching.
+	 *
+	 * 暴露特定的DispatcherServlet的请求属性，并委托doDispatch()进行实际调度。
 	 */
 	@Override
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {

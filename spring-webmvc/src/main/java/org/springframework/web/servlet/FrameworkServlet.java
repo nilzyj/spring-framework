@@ -139,6 +139,18 @@ import org.springframework.web.util.WebUtils;
  * @see #setContextInitializerClasses
  * @see #setNamespace
  */
+
+/**
+ * 为 Spring web框架提供基础servlet。
+ * 在一个基于JavaBean的整体解决方案中，提供与Spring应用上下文的集成。
+ *
+ * 该类提供以下功能：
+ * 1、为每个servlet管理一个WebApplicationContext实例。servlet的配置是由servlet的命名空间中的bean决定的。
+ * 2、发布请求处理的事件，无论请求是否被成功处理。
+ *
+ * 子类必须实现doService()来处理请求。因为该类继承了HttpServletBean，而不是直接继承HttpServlet，所以bean属性会自动映射到它身上(?)。
+ * 子类可以重写initFrameworkServlet()进行自定义初始化。
+ */
 @SuppressWarnings("serial")
 public abstract class FrameworkServlet extends HttpServletBean implements ApplicationContextAware {
 
@@ -146,84 +158,134 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * Suffix for WebApplicationContext namespaces. If a servlet of this class is
 	 * given the name "test" in a context, the namespace used by the servlet will
 	 * resolve to "test-servlet".
+	 * WebApplicationContext命名空间的后缀。如果在上下文中给这个类的servlet取名 "test"，
+	 * 那么servlet使用的命名空间将解析为 "test-servlet"。
 	 */
 	public static final String DEFAULT_NAMESPACE_SUFFIX = "-servlet";
 
 	/**
 	 * Default context class for FrameworkServlet.
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
+	 * FrameworkServlet的默认上下文类。
 	 */
 	public static final Class<?> DEFAULT_CONTEXT_CLASS = XmlWebApplicationContext.class;
 
 	/**
 	 * Prefix for the ServletContext attribute for the WebApplicationContext.
 	 * The completion is the servlet name.
+	 * WebApplicationContext的ServletContext属性的前缀。
+	 * 完整的值是servlet的名称
 	 */
 	public static final String SERVLET_CONTEXT_PREFIX = FrameworkServlet.class.getName() + ".CONTEXT.";
 
 	/**
 	 * Any number of these characters are considered delimiters between
 	 * multiple values in a single init-param String value.
+	 * 任何数量的这些字符都被认为是一个init-param字符串值中多个值之间的定界符。
 	 */
 	private static final String INIT_PARAM_DELIMITERS = ",; \t\n";
 
-
-	/** ServletContext attribute to find the WebApplicationContext in. */
+	/**
+	 * ServletContext attribute to find the WebApplicationContext in.
+	 * 用来寻找WebApplicationContext中的ServletContext属性。
+	 */
 	@Nullable
 	private String contextAttribute;
 
-	/** WebApplicationContext implementation class to create. */
+	/** WebApplicationContext implementation class to create.(?) */
 	private Class<?> contextClass = DEFAULT_CONTEXT_CLASS;
 
-	/** WebApplicationContext id to assign. */
+	/**
+	 * WebApplicationContext id to assign.
+	 * 要分配的WebApplicationContext id
+	 */
 	@Nullable
 	private String contextId;
 
-	/** Namespace for this servlet. */
+	/**
+	 * Namespace for this servlet.
+	 * 这个servlet的命名空间
+	 */
 	@Nullable
 	private String namespace;
 
-	/** Explicit context config location. */
+	/**
+	 * Explicit context config location.
+	 * 明确上下文配置位置
+	 */
 	@Nullable
 	private String contextConfigLocation;
 
-	/** Actual ApplicationContextInitializer instances to apply to the context. */
+	/**
+	 * Actual ApplicationContextInitializer instances to apply to the context.
+	 * 实际用于上下文的ApplicationContextInitializer实例
+	 */
 	private final List<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
 			new ArrayList<>();
 
-	/** Comma-delimited ApplicationContextInitializer class names set through init param. */
+	/**
+	 * Comma-delimited ApplicationContextInitializer class names set through init param.
+	 * 通过init param设置的以逗号分隔的ApplicationContextInitializer类名。
+	 */
 	@Nullable
 	private String contextInitializerClasses;
 
-	/** Should we publish the context as a ServletContext attribute?. */
+	/**
+	 * Should we publish the context as a ServletContext attribute?
+	 * 我们是否应该将上下文发布为ServletContext属性？
+	 */
 	private boolean publishContext = true;
 
-	/** Should we publish a ServletRequestHandledEvent at the end of each request?. */
+	/**
+	 * Should we publish a ServletRequestHandledEvent at the end of each request?.
+	 * 我们是否应该在每个请求的最后发布一个ServletRequestHandledEvent？
+	 */
 	private boolean publishEvents = true;
 
-	/** Expose LocaleContext and RequestAttributes as inheritable for child threads?. */
+	/**
+	 * Expose LocaleContext and RequestAttributes as inheritable for child threads?.
+	 * 是否将LocaleContext和RequestAttributes暴露给子线程，使其可被子线程继承？
+	 */
 	private boolean threadContextInheritable = false;
 
-	/** Should we dispatch an HTTP OPTIONS request to {@link #doService}?. */
+	/**
+	 * Should we dispatch an HTTP OPTIONS request to {@link #doService}?.
+	 * 我们是否应该向doService发送HTTP OPTIONS请求？
+	 */
 	private boolean dispatchOptionsRequest = false;
 
-	/** Should we dispatch an HTTP TRACE request to {@link #doService}?. */
+	/**
+	 * Should we dispatch an HTTP TRACE request to {@link #doService}?.
+	 * 我们是否应该向doService发送HTTP OPTIONS请求？
+	 */
 	private boolean dispatchTraceRequest = false;
 
 	/** Whether to log potentially sensitive info (request params at DEBUG + headers at TRACE). */
 	private boolean enableLoggingRequestDetails = false;
 
-	/** WebApplicationContext for this servlet. */
+	/**
+	 * WebApplicationContext for this servlet.
+	 * 该servlet的WebApplicationContext
+	 */
 	@Nullable
 	private WebApplicationContext webApplicationContext;
 
-	/** If the WebApplicationContext was injected via {@link #setApplicationContext}. */
+	/**
+	 * If the WebApplicationContext was injected via {@link #setApplicationContext}.
+	 * WebApplicationContext是否是通过setApplicationContext注入的。
+	 */
 	private boolean webApplicationContextInjected = false;
 
-	/** Flag used to detect whether onRefresh has already been called. */
+	/**
+	 * Flag used to detect whether onRefresh has already been called.
+	 * 用于检测是否已经调用了onRefresh()的标志。
+	 */
 	private volatile boolean refreshEventReceived;
 
-	/** Monitor for synchronized onRefresh execution. */
+	/**
+	 * Monitor for synchronized onRefresh execution.
+	 * 同步监控onRefresh执行
+	 */
 	private final Object onRefreshMonitor = new Object();
 
 
