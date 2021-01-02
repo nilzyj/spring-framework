@@ -256,12 +256,16 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Request attribute to hold the current LocaleResolver, retrievable by views.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocaleResolver
+	 *
+	 * 请求属性，用于保存当前的LocaleResolver，可由视图检索。
 	 */
 	public static final String LOCALE_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".LOCALE_RESOLVER";
 
 	/**
 	 * Request attribute to hold the current ThemeResolver, retrievable by views.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeResolver
+	 *
+	 * 请求属性，用于保存当前的ThemeResolver，可由视图检索。
 	 */
 	public static final String THEME_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_RESOLVER";
 
@@ -392,6 +396,16 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * indicates which {@code ApplicationContextInitializer} classes should be used to
 	 * further configure the internal application context prior to refresh().
 	 * @see #DispatcherServlet(WebApplicationContext)
+	 *
+	 * 创建一个新的DispatcherServlet，它将根据通过servlet init-params提供的默认值和值来创建自己的内部Web应用程序上下文。通常在
+	 * Servlet 2.5或更早的环境中使用，在这些环境中，servlet注册的唯一选择是通过web.xml，这需要使用一个无参数的构造函数。
+	 *
+	 * 调用setContextConfigLocation(init-param contextConfigLocation')将决定哪些XML文件将被DEFAULT_CONTEXT_CLASS默认的
+	 * XmlWebApplicationContext加载
+	 * 调用setContextClass(init-param 'contextClass')将覆盖默认的XmlWebApplicationContext，
+	 * 并允许指定一个替代的类，如AnnotationConfigWebApplicationContext。
+	 * 调用setContextInitializerClasses(init-param 'contextInitializerClasses')表示应该使用哪些ApplicationContextInitializer类
+	 * 在refresh()之前进一步配置内部应用上下文。
 	 */
 	public DispatcherServlet() {
 		super();
@@ -448,6 +462,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * just a single bean with name "handlerMapping" will be expected.
 	 * <p>Default is "true". Turn this off if you want this servlet to use a single
 	 * HandlerMapping, despite multiple HandlerMapping beans being defined in the context.
+	 *
+	 * 设置是否检测该servlet上下文中的所有 HandlerMapping beans。否则，只需要一个名字为 "handlerMapping"的Bean就可以了。
+	 * 默认为 "true"。如果你想让这个servlet使用一个单一的 HandlerMapping，尽管上下文中定义了多个 HandlerMapping beans，那么关闭这个选项。
 	 */
 	public void setDetectAllHandlerMappings(boolean detectAllHandlerMappings) {
 		this.detectAllHandlerMappings = detectAllHandlerMappings;
@@ -517,6 +534,8 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * This implementation calls {@link #initStrategies}.
+	 *
+	 * 该实现调用 initStrategies()
 	 */
 	@Override
 	protected void onRefresh(ApplicationContext context) {
@@ -526,6 +545,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Initialize the strategy objects that this servlet uses.
 	 * <p>May be overridden in subclasses in order to initialize further strategy objects.
+	 *
+	 * 初始化该 servlet使用的策略对象。
+	 * 可以在子类中重写，以便初始化更多的策略对象。
 	 */
 	protected void initStrategies(ApplicationContext context) {
 		initMultipartResolver(context);
@@ -543,6 +565,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Initialize the MultipartResolver used by this class.
 	 * <p>If no bean is defined with the given name in the BeanFactory for this namespace,
 	 * no multipart handling is provided.
+	 *
+	 * 初始化该类使用的 MultipartResolver。
+	 * 如果在这个命名空间的 BeanFactory中没有定义给定名称的 Bean，则不提供 multipart处理。
 	 */
 	private void initMultipartResolver(ApplicationContext context) {
 		try {
@@ -962,6 +987,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Keep a snapshot of the request attributes in case of an include,
 		// to be able to restore the original attributes after the include.
+		// 在发生include的情况下，保留请求属性的快照，以便在include之后能够恢复原来的属性。(?)
 		Map<String, Object> attributesSnapshot = null;
 		if (WebUtils.isIncludeRequest(request)) {
 			attributesSnapshot = new HashMap<>();

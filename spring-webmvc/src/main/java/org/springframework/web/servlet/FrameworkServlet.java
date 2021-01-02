@@ -657,6 +657,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			// Either the context is not a ConfigurableApplicationContext with refresh
 			// support or the context injected at construction time had already been
 			// refreshed -> trigger initial onRefresh manually here.
+			// 要么上下文不是一个支持刷新的Context，要么在构建时注入的上下文已经被刷新-->在这里手动触发初始onRefresh。
 			synchronized (this.onRefreshMonitor) {
 				onRefresh(wac);
 			}
@@ -897,8 +898,12 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * <p>The default implementation calls {@link #onRefresh},
 	 * triggering a refresh of this servlet's context-dependent state.
 	 * @param event the incoming ApplicationContext event
+	 *
+	 * 从这个 servlet的 WebApplicationContext接收刷新事件的回调。
+	 * 触发这个 servlet依赖上下文的状态的刷新时的默认实现，该实现调用 onRefresh()。
 	 */
 	public void onApplicationEvent(ContextRefreshedEvent event) {
+		// 设置onRefresh()为已调用
 		this.refreshEventReceived = true;
 		synchronized (this.onRefreshMonitor) {
 			onRefresh(event.getApplicationContext());
@@ -911,6 +916,10 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * <p>This implementation is empty.
 	 * @param context the current WebApplicationContext
 	 * @see #refresh()
+	 *
+	 * 模板方法，可以重写以添加特定的 servlet刷新工作。
+	 * 成功刷新上下文后调用。
+	 * 该实现为空
 	 */
 	protected void onRefresh(ApplicationContext context) {
 		// For subclasses: do nothing by default.
@@ -919,19 +928,23 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/**
 	 * Close the WebApplicationContext of this servlet.
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
+	 *
+	 * 关闭 servlet的 WebApplicationContext
 	 */
 	@Override
 	public void destroy() {
 		getServletContext().log("Destroying Spring FrameworkServlet '" + getServletName() + "'");
 		// Only call close() on WebApplicationContext if locally managed...
+		// 只有在本地管理的情况下才会在WebApplicationContext上调用close()。
 		if (this.webApplicationContext instanceof ConfigurableApplicationContext && !this.webApplicationContextInjected) {
 			((ConfigurableApplicationContext) this.webApplicationContext).close();
 		}
 	}
 
-
 	/**
 	 * Override the parent class implementation in order to intercept PATCH requests.
+	 *
+	 * 重写父类的实现，以便拦截patch请求。
 	 */
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
@@ -952,6 +965,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * with a {@code NoBodyResponse} that just captures the content length.
 	 * @see #doService
 	 * @see #doHead
+	 *
+	 * 将GET请求委托给processRequest/doService。
+	 * 也会被HttpServlet默认实现的doHead所调用，NoBodyResponse只是采集内容长度。
 	 */
 	@Override
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -963,6 +979,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/**
 	 * Delegate POST requests to {@link #processRequest}.
 	 * @see #doService
+	 *
+	 * 将 POST请求委托给{@link #processRequest}。
 	 */
 	@Override
 	protected final void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -974,6 +992,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/**
 	 * Delegate PUT requests to {@link #processRequest}.
 	 * @see #doService
+	 *
+	 * 将 PUT请求委托给{@link #processRequest}。
 	 */
 	@Override
 	protected final void doPut(HttpServletRequest request, HttpServletResponse response)
@@ -985,6 +1005,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/**
 	 * Delegate DELETE requests to {@link #processRequest}.
 	 * @see #doService
+	 *
+	 * 将 DELETE请求委托给{@link #processRequest}。
 	 */
 	@Override
 	protected final void doDelete(HttpServletRequest request, HttpServletResponse response)
@@ -998,6 +1020,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * <p>Applies HttpServlet's standard OPTIONS processing otherwise,
 	 * and also if there is still no 'Allow' header set after dispatching.
 	 * @see #doService
+	 *
+	 * 如果需要，将OPTIONS请求委托给{@link #processRequest}。
+	 * 应用HttpServlet的标准OPTIONS处理，否则，也可以在调度后仍然没有设置'Allow'头。
 	 */
 	@Override
 	protected void doOptions(HttpServletRequest request, HttpServletResponse response)
@@ -1007,11 +1032,13 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			processRequest(request, response);
 			if (response.containsHeader("Allow")) {
 				// Proper OPTIONS response coming from a handler - we're done.
+				// 来自处理程序的正确OPTIONS响应--我们完成了。
 				return;
 			}
 		}
 
 		// Use response wrapper in order to always add PATCH to the allowed methods
+		// 使用响应包装器，以便始终将PATCH添加到允许的方法中。
 		super.doOptions(request, new HttpServletResponseWrapper(response) {
 			@Override
 			public void setHeader(String name, String value) {
@@ -1027,6 +1054,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * Delegate TRACE requests to {@link #processRequest}, if desired.
 	 * <p>Applies HttpServlet's standard TRACE processing otherwise.
 	 * @see #doService
+	 *
+	 * 如果需要，将TRACE请求委托给{@link #processRequest}。
+	 * 否则，应用 HttpServlet的标准 TRACE处理。
 	 */
 	@Override
 	protected void doTrace(HttpServletRequest request, HttpServletResponse response)
@@ -1046,6 +1076,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * Process this request, publishing an event regardless of the outcome.
 	 * <p>The actual event handling is performed by the abstract
 	 * {@link #doService} template method.
+	 *
+	 * 处理这个请求，无论结果如何，都要发布一个事件。
+	 * 实际的事件处理由抽象的{@link #doService}模板方法执行。
 	 */
 	protected final void processRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -1092,6 +1125,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @param request current HTTP request
 	 * @return the corresponding LocaleContext, or {@code null} if none to bind
 	 * @see LocaleContextHolder#setLocaleContext
+	 *
+	 * 为给定的请求建立一个LocaleContext，将请求的主要locale作为当前locale。
 	 */
 	@Nullable
 	protected LocaleContext buildLocaleContext(HttpServletRequest request) {
