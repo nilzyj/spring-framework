@@ -16,29 +16,8 @@
 
 package org.springframework.web.servlet;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -65,6 +44,15 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.WebUtils;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Central dispatcher for HTTP request handlers/controllers, e.g. for web UI controllers
@@ -1273,6 +1261,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 		// If not returned before: return original request.
+		// 如果前面没有返回；返回原始请求
 		return request;
 	}
 
@@ -1488,6 +1477,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @throws Exception if the view cannot be resolved
 	 * (typically in case of problems creating an actual View object)
 	 * @see ViewResolver#resolveViewName
+	 *
+	 * 将给定的视图名称解析为一个视图对象（要渲染）。
 	 */
 	@Nullable
 	protected View resolveViewName(String viewName, @Nullable Map<String, Object> model,
@@ -1517,6 +1508,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Restore the request attributes after an include.
 	 * @param request current HTTP request
 	 * @param attributesSnapshot the snapshot of the request attributes before the include
+	 *
+	 * 在include后恢复请求的属性。
 	 */
 	@SuppressWarnings("unchecked")
 	private void restoreAttributesAfterInclude(HttpServletRequest request, Map<?, ?> attributesSnapshot) {
@@ -1532,10 +1525,12 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		// Add attributes that may have been removed
+		// 添加可能已被删除的属性
 		attrsToCheck.addAll((Set<String>) attributesSnapshot.keySet());
 
 		// Iterate over the attributes to check, restoring the original value
 		// or removing the attribute, respectively, if appropriate.
+		// 对要检查的属性进行迭代，适当时分别恢复原值或删除属性。
 		for (String attrName : attrsToCheck) {
 			Object attrValue = attributesSnapshot.get(attrName);
 			if (attrValue == null) {
